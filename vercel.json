@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/check-expiry",
+      "dest": "/api/check-expiry.js"
+    },
+    {
+      "src": "/api/expiring-beers",
+      "dest": "/api/expiring-beers.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

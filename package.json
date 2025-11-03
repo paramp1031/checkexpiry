@@ -1,0 +1,23 @@
+{
+  "name": "beer-expiry-alert-system",
+  "version": "1.0.0",
+  "description": "Automated system to check beer expiry dates and send alerts via email",
+  "main": "index.js",
+  "scripts": {
+    "cron": "node cron-service.js"
+  },
+  "keywords": [
+    "beer",
+    "expiry",
+    "alert",
+    "email"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^7.0.10",
+    "xlsx": "^0.18.5"
+  }
+}
