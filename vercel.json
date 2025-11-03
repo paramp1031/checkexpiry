@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "beer-expiry-alert-system",
   "builds": [
     {
       "src": "api/**/*.js",
@@ -14,6 +15,10 @@
     {
       "src": "/api/expiring-beers",
       "dest": "/api/expiring-beers.js"
+    },
+    {
+      "src": "/",
+      "dest": "/api/index.js"
     }
   ],
   "env": {

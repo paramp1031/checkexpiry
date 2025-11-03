@@ -77,11 +77,13 @@ stock-alerts
 ## Good Commit Messages Examples
 
 ### Initial Commit
+
 ```
 Initial commit: Beer Expiry Alert System with automated email notifications
 ```
 
 ### Feature Commits
+
 ```
 feat: Add automatic cron service for expiry checking
 
@@ -93,6 +95,7 @@ feat: Add RESTful API endpoints for Vercel deployment
 ```
 
 ### Documentation Commits
+
 ```
 docs: Add comprehensive email setup guide
 
@@ -104,6 +107,7 @@ docs: Update README with complete project documentation
 ```
 
 ### Bug Fix Commits
+
 ```
 fix: Correct Excel date parsing for multiple formats
 
@@ -117,25 +121,31 @@ fix: Resolve Excel file path resolution issues
 ## GitHub Repository Settings
 
 ### Repository Name
+
 ```
 beer-expiry-alert-system
 ```
+
 or
+
 ```
 beer-inventory-expiry-alert
 ```
 
 ### Description (GitHub)
+
 ```
 Automated beer inventory expiry alert system that reads Excel files, detects products expiring within 5 days, and sends email notifications to bar managers.
 ```
 
 ### Website (Optional)
+
 ```
 https://your-project.vercel.app
 ```
 
 ### Topics (GitHub Topics)
+
 ```
 beer-inventory, expiry-alert, inventory-management, email-notifications, nodejs, excel-parser, automation, cron-jobs, vercel, serverless, bar-management
 ```
@@ -145,9 +155,11 @@ beer-inventory, expiry-alert, inventory-management, email-notifications, nodejs,
 ## Social Preview
 
 ### Short Version
+
 **Beer Expiry Alert System** - Automated inventory monitoring with email notifications for bars and restaurants.
 
 ### Medium Version
+
 **Beer Expiry Alert System** - A Node.js application that automatically monitors beer inventory from Excel files, detects products expiring within 5 days, and sends formatted email alerts to bar managers. Features automatic cron scheduling and Vercel deployment support.
 
 ---
@@ -165,11 +177,13 @@ beer-inventory, expiry-alert, inventory-management, email-notifications, nodejs,
 ## Quick Copy-Paste
 
 ### For GitHub Repository Description:
+
 ```
 Automated beer inventory expiry alert system that reads Excel files, detects products expiring within 5 days, and sends email notifications to bar managers. Built with Node.js, supports cron scheduling, and ready for Vercel deployment.
 ```
 
 ### For README Header:
+
 ```markdown
 # Beer Expiry Alert System
 

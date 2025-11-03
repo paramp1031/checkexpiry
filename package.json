@@ -4,7 +4,9 @@
   "description": "Automated system to check beer expiry dates and send alerts via email",
   "main": "index.js",
   "scripts": {
-    "cron": "node cron-service.js"
+    "cron": "node cron-service.js",
+    "dev": "node server.js",
+    "start": "node server.js"
   },
   "keywords": [
     "beer",
@@ -16,6 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.3.1",
+    "express": "^4.21.2",
     "node-cron": "^3.0.3",
     "nodemailer": "^7.0.10",
     "xlsx": "^0.18.5"
