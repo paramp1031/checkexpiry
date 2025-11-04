@@ -9,6 +9,10 @@
   ],
   "routes": [
     {
+      "src": "/",
+      "dest": "/api/index.js"
+    },
+    {
       "src": "/api/check-expiry",
       "dest": "/api/check-expiry.js"
     },
