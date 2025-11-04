@@ -21,6 +21,12 @@
       "dest": "/api/expiring-beers.js"
     }
   ],
+  "crons": [
+    {
+      "path": "/api/check-expiry",
+      "schedule": "*/10 * * * *"
+    }
+  ],
   "env": {
     "NODE_ENV": "production"
   }
