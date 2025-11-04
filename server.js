@@ -1,103 +1,238 @@
-/**
- * Local Development Server
- * Run: npm run dev or npm start
- * Access: http://localhost:3000
- */
-
 require("dotenv").config();
 const express = require("express");
+const cron = require("node-cron");
+const { getExpiringBeers } = require("./utils/excelReader");
+const { sendExpiryAlert } = require("./utils/emailService");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Configuration
+const EXPIRY_DAYS = 5; // Check for beers expiring within 5 days
 
-// CORS middleware
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-    return;
-  }
-  next();
+// Serve static files if needed
+app.use(express.static("public"));
+
+// Attractive homepage route
+app.get("/", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Stock Expiry Checker - Server Running</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        
+        .container {
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 20px;
+          padding: 60px 40px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          text-align: center;
+          max-width: 600px;
+          width: 100%;
+          animation: fadeIn 0.8s ease-in;
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .icon {
+          font-size: 80px;
+          margin-bottom: 20px;
+          animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+        }
+        
+        h1 {
+          color: #333;
+          font-size: 2.5em;
+          margin-bottom: 15px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        
+        .message {
+          color: #666;
+          font-size: 1.2em;
+          line-height: 1.6;
+          margin-bottom: 30px;
+        }
+        
+        .status {
+          display: inline-block;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 12px 30px;
+          border-radius: 30px;
+          font-weight: 600;
+          font-size: 1.1em;
+          margin-top: 20px;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .status-dot {
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          background: #4ade80;
+          border-radius: 50%;
+          margin-right: 8px;
+          animation: blink 2s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        
+        .footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e0e0e0;
+          color: #999;
+          font-size: 0.9em;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="icon">📦</div>
+        <h1>Stock Expiry Checker</h1>
+        <p class="message">
+          Your server is running and ready to check the expiry of your stocks!
+        </p>
+        <div class="status">
+          <span class="status-dot"></span>
+          Server is Active
+        </div>
+        <div class="footer">
+          Monitoring stock expiry status in real-time
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
-// Import API handlers
-const checkExpiry = require("./api/check-expiry");
-const expiringBeers = require("./api/expiring-beers");
-const indexPage = require("./api/index");
+// Cron job function - checks for expiring stocks
+async function performExpiryCheck() {
+  const timestamp = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Kolkata",
+    dateStyle: "short",
+    timeStyle: "medium",
+  });
 
-// Routes
-app.get("/", async (req, res) => {
   console.log(
-    `[${new Date().toISOString()}] 🌐 Homepage request from ${req.ip}`
+    `[${timestamp}] Checking for stocks expiring within ${EXPIRY_DAYS} days...`
   );
-  await indexPage(req, res);
-});
 
-app.get("/api/check-expiry", async (req, res) => {
-  await checkExpiry(req, res);
-});
+  try {
+    const expiringBeers = getExpiringBeers(EXPIRY_DAYS);
 
-app.post("/api/check-expiry", async (req, res) => {
-  await checkExpiry(req, res);
-});
+    if (expiringBeers.length === 0) {
+      console.log(
+        `[${timestamp}] No stocks expiring within ${EXPIRY_DAYS} days`
+      );
+      return;
+    }
 
-app.get("/api/expiring-beers", async (req, res) => {
-  await expiringBeers(req, res);
-});
+    console.log(
+      `[${timestamp}] Found ${expiringBeers.length} stock(s) expiring soon`
+    );
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(`[${new Date().toISOString()}] ❌ Server Error:`, err);
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-    error: err.message,
-  });
-});
+    // Send email alert
+    if (
+      process.env.EMAIL_USER &&
+      process.env.EMAIL_PASS &&
+      process.env.BAR_MANAGER_EMAIL
+    ) {
+      try {
+        console.log(`[${timestamp}] Sending email alert...`);
+        await sendExpiryAlert(expiringBeers);
+        console.log(
+          `[${timestamp}] Email sent successfully to ${process.env.BAR_MANAGER_EMAIL}`
+        );
+      } catch (emailError) {
+        console.error(
+          `[${timestamp}] Error sending email: ${emailError.message}`
+        );
+      }
+    } else {
+      console.log(`[${timestamp}] Email not configured. Skipping email alert.`);
+    }
+  } catch (error) {
+    console.error(`[${timestamp}] Error during expiry check: ${error.message}`);
+  }
+}
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-    path: req.path,
-  });
-});
+// Start cron job - runs every minute
+console.log("Starting cron service...");
+// cron.schedule(
+//   "* * * * *",
+//   () => {
+//     performExpiryCheck();
+//   },
+//   {
+//     scheduled: true,
+//     timezone: "Asia/Kolkata",
+//   }
+// );
+cron.schedule(
+  "*/10 * * * *",
+  () => {
+    performExpiryCheck();
+  },
+  {
+    scheduled: true,
+    timezone: "Asia/Kolkata",
+  }
+);
+// Perform initial check immediately
+performExpiryCheck();
 
 // Start server
 app.listen(PORT, () => {
-  console.log("");
-  console.log("╔══════════════════════════════════════════════════════════╗");
-  console.log("║     Beer Expiry Alert System - Local Server              ║");
-  console.log("╚══════════════════════════════════════════════════════════╝");
-  console.log("");
-  console.log(`🚀 Server running on: http://localhost:${PORT}`);
-  console.log("");
-  console.log("📍 Available endpoints:");
-  console.log(`   • Homepage:        http://localhost:${PORT}/`);
-  console.log(
-    `   • Check Expiry:     http://localhost:${PORT}/api/check-expiry`
-  );
-  console.log(
-    `   • Expiring Beers:  http://localhost:${PORT}/api/expiring-beers?days=5`
-  );
-  console.log("");
-  console.log("✅ Press Ctrl+C to stop");
-  console.log("");
-});
-
-// Handle graceful shutdown
-process.on("SIGINT", () => {
-  console.log("\n🛑 Shutting down server...");
-  process.exit(0);
-});
-
-process.on("SIGTERM", () => {
-  console.log("\n🛑 Shutting down server...");
-  process.exit(0);
+  console.log("Server is running for checking expiry of your stocks");
+  console.log(`Server running on: http://localhost:${PORT}`);
+  console.log("Cron service is running - checking every minute");
 });
